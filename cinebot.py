@@ -1,4 +1,29 @@
-from tmdbv3api import TMDb, Movie
+from tmdbv3api import TMDb, Movie, Credit
+
+class MovieInfo:
+    def __init__(self, movie_info, movie_details) -> None:
+        self.title = movie_info["title"]
+        self.poster_path = movie_info["poster_path"]
+        self.release_date = movie_info["release_date"]
+        self.overview = movie_info["overview"]
+
+        self.details = movie_details
+ 
+        for person in self.details["casts"]["crew"]:
+            if person["job"] == "Director":
+                self.director = person["name"]
+        
+        self.cast = movie_details["casts"]["cast"]
+        self.four_main_actor = {}
+        
+        if len(self.cast) <= 8:
+            for actor in self.cast:
+                self.four_main_actor[f"{actor['name']}"] = actor["character"]
+        else:
+            for i in range(8):
+                for actor in self.cast:
+                    if int(actor["order"]) == i:
+                        self.four_main_actor[f"{actor['name']}"] = actor["character"]
 
 class Client(TMDb):
     """A class that represents a TMDB client.
@@ -29,7 +54,7 @@ class Client(TMDb):
         self.language = language
 
 
-class Movie(Client, Movie):
+class MovieSearch(Movie, Credit):
     """A class that represents a movie.
 
     This class extends the Client and Movie classes and provides additional functionality for searching movies.
@@ -45,7 +70,7 @@ class Movie(Client, Movie):
 
     """
 
-    def __init__(self, api_key, language="fr"):
+    def __init__(self, client):
         """Initialize the Movie object.
 
         Args:
@@ -53,7 +78,8 @@ class Movie(Client, Movie):
             language: The language to use for the client (default is "fr").
 
         """
-        super().__init__(api_key, language)
+        Movie.__init__(self, client)
+        Credit.__init__(self, client)
 
     def search(self, query):
         """Search for movies.
@@ -65,4 +91,19 @@ class Movie(Client, Movie):
             The search results.
 
         """
-        return super().search(query)
+        return_list = []
+
+        movies = super().search(query)
+        movies_list = list(movies)
+
+        for res in movies_list:
+            movie_id = res["id"]
+            movie_details = self.get_details(movie_id)
+
+            new_film = MovieInfo(res, movie_details)
+            return_list.append(new_film)
+
+        return return_list
+    
+    def get_details(self, id):
+        return super().details(id)

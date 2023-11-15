@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from discord.ext import commands
+from cinebot import Client
 import os
 import discord
 
@@ -25,7 +26,6 @@ bot = CineBot()
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="des films"))
-
     await bot.tree.sync()
 
 bot.run(DISCORD_TOKEN)

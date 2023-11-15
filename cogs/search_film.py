@@ -1,10 +1,9 @@
 from discord import app_commands
 from discord.ext import commands
-from cinebot import Movie
+from cinebot import MovieSearch, MovieInfo, Client
 from dotenv import load_dotenv
 import os
 import discord
-
 
 class MovieInfo(discord.Embed):
     """A class that represents a movie information embed.
@@ -45,12 +44,16 @@ class MovieInfo(discord.Embed):
 
         if movie_infos.release_date:
             self.add_field(
-                name="Date de sortie", value=f"{movie_infos.release_date}", inline=False
+                name="Date de sortie", value=f"{movie_infos.release_date}", inline=True
             )
         else:
             self.add_field(
-                name="Date de sortie", value="A determiner | Inconnue", inline=False
+                name="Date de sortie", value="A determiner | Inconnue", inline=True
             )
+
+        self.add_field(
+            name="Réalisateur", value=movie_infos.director, inline=True
+        )
 
         len_overview_movie = len(movie_infos.overview)
         if len_overview_movie > 1900:
@@ -61,6 +64,14 @@ class MovieInfo(discord.Embed):
             self.add_field(
                 name="Synopsis", value=f"{movie_infos.overview}", inline=False
             )
+
+        acteurs = "".join(
+            f"{acteur} : {charac}\n"
+            for acteur, charac in movie_infos.four_main_actor.items()
+        )
+        self.add_field(
+            name="Acteurs principaux", value=acteurs
+        )
 
     def get_embed(self):
         """Get the movie information embed.
@@ -151,7 +162,7 @@ class SelectView(discord.ui.View):
         self.add_item(MovieSelection(list_movie))
 
 
-class SearchMusic(commands.Cog):
+class SearchMovie(commands.Cog):
     """A class that represents a search music cog.
 
     This cog provides functionality to search for movies using the TMDB API.
@@ -176,7 +187,8 @@ class SearchMusic(commands.Cog):
         self.bot = bot
         load_dotenv()
         API_KEY_TMDB = os.getenv("API_KEY_TMDB")
-        self.movie = Movie(API_KEY_TMDB)
+        self.client = Client(API_KEY_TMDB)
+        self.movie = MovieSearch(self.client)
 
     @app_commands.command()
     async def search(self, interaction, nom_du_film: str):
@@ -191,7 +203,7 @@ class SearchMusic(commands.Cog):
 
         """
         self.result = self.movie.search(nom_du_film)
-        top_10_results = list(self.result.results)[:10]
+        top_10_results = self.result[:10]
         emb = discord.Embed(
             title="Resultats - 10 films les plus populaires",
             color=discord.Color.from_rgb(69, 44, 129),
@@ -219,10 +231,10 @@ class SearchMusic(commands.Cog):
 
         """
         self.result = self.movie.search(nom_du_film)
-        top_movie = list(self.result.results)[0]
+        top_movie = self.result[0]
 
         await interaction.response.send_message(embed=MovieInfo(top_movie).get_embed())
 
 
 async def setup(bot):
-    await bot.add_cog(SearchMusic(bot))
+    await bot.add_cog(SearchMovie(bot))
