@@ -16,11 +16,11 @@ class MovieInfo:
         self.cast = movie_details["casts"]["cast"]
         self.four_main_actor = {}
         
-        if len(self.cast) <= 8:
+        if len(self.cast) <= 4:
             for actor in self.cast:
                 self.four_main_actor[f"{actor['name']}"] = actor["character"]
         else:
-            for i in range(8):
+            for i in range(4):
                 for actor in self.cast:
                     if int(actor["order"]) == i:
                         self.four_main_actor[f"{actor['name']}"] = actor["character"]

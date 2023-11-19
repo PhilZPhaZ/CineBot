@@ -4,6 +4,7 @@ from cinebot import MovieSearch, MovieInfo, Client
 from dotenv import load_dotenv
 import os
 import discord
+import asyncio
 
 class MovieInfo(discord.Embed):
     """A class that represents a movie information embed.
@@ -150,7 +151,7 @@ class SelectView(discord.ui.View):
 
     """
 
-    def __init__(self, *, timeout=60, list_movie):
+    def __init__(self, list_movie, timeout=60):
         """Initialize the SelectView.
 
         Args:
@@ -191,7 +192,7 @@ class SearchMovie(commands.Cog):
         self.movie = MovieSearch(self.client)
 
     @app_commands.command()
-    async def search(self, interaction, nom_du_film: str):
+    async def search(self, interaction: discord.Interaction, nom_du_film: str):
         """Search for movies and display the top 10 results with their posters.
 
         Args:
@@ -202,6 +203,8 @@ class SearchMovie(commands.Cog):
             None
 
         """
+        await interaction.response.defer()
+        
         self.result = self.movie.search(nom_du_film)
         top_10_results = self.result[:10]
         emb = discord.Embed(
@@ -214,8 +217,9 @@ class SearchMovie(commands.Cog):
                 value=f"[Poster de : {res.title}](https://image.tmdb.org/t/p/w500{res.poster_path})",
                 inline=False,
             )
-        await interaction.response.send_message(
-            embed=emb, view=SelectView(list_movie=top_10_results)
+
+        await interaction.followup.send(
+            embed=emb, view=SelectView(top_10_results)
         )
 
     @app_commands.command()
@@ -230,10 +234,12 @@ class SearchMovie(commands.Cog):
             None
 
         """
+        await interaction.response.defer()
+        
         self.result = self.movie.search(nom_du_film)
         top_movie = self.result[0]
 
-        await interaction.response.send_message(embed=MovieInfo(top_movie).get_embed())
+        await interaction.followup.send(embed=MovieInfo(top_movie).get_embed())
 
 
 async def setup(bot):
