@@ -2,6 +2,33 @@ from tmdbv3api import TMDb, Movie, Person
 import datetime
 
 class MovieInfo:
+    """
+    Represents movie information.
+
+    Args:
+        movie_info (dict): A dictionary containing general movie information.
+        movie_details (dict): A dictionary containing additional movie details.
+        movie_videos_info (obj): An object containing movie video information.
+
+    Attributes:
+        title (str): The title of the movie.
+        poster_path (str): The path to the movie's poster image.
+        overview (str): A brief overview of the movie.
+        vote_average (float): The average vote rating for the movie.
+        vote_count (int): The number of votes for the movie.
+        release_date (str): The formatted release date of the movie.
+        details (dict): Additional details about the movie.
+        director (str): The name of the movie's director.
+        cast (list): A list of cast members in the movie.
+        four_main_actor (dict): A dictionary containing the names of the four main actors and their corresponding characters.
+        trailer_key (str): The key of the movie's trailer video.
+
+    Raises:
+        None
+
+    Examples:
+        None
+    """
     def __init__(self, movie_info, movie_details, movie_videos_info) -> None:
         # general
         self.title = movie_info["title"]

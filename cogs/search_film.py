@@ -4,7 +4,6 @@ from cinebot import MovieSearch, MovieInfo, Client
 from dotenv import load_dotenv
 import os
 import discord
-import asyncio
 
 class MovieInfo(discord.Embed):
     """A class that represents a movie information embed.
