@@ -1,14 +1,20 @@
-from tmdbv3api import TMDb, Movie, Credit, Person
+from tmdbv3api import TMDb, Movie, Person
+import datetime
 
 class MovieInfo:
-    def __init__(self, movie_info, movie_details) -> None:
+    def __init__(self, movie_info, movie_details, movie_videos_info) -> None:
+        # general
         self.title = movie_info["title"]
         self.poster_path = movie_info["poster_path"]
-        self.release_date = movie_info["release_date"]
         self.overview = movie_info["overview"]
         self.vote_average = movie_info["vote_average"]
         self.vote_count = movie_info["vote_count"]
+        
+        release_date = movie_info["release_date"]
+        date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
+        self.release_date = date.strftime("%A %d %B %Y").capitalize()
 
+        # cast
         self.details = movie_details
 
         for person in self.details["casts"]["crew"]:
@@ -26,6 +32,12 @@ class MovieInfo:
                 for actor in self.cast:
                     if int(actor["order"]) == i:
                         self.four_main_actor[f"{actor['name']}"] = actor["character"]
+        
+        # video
+        self.trailer_key = None
+        for video in movie_videos_info.results:
+            if video["type"] == 'Trailer':
+                self.trailer_key = video["key"]
 
 class Client(TMDb):
     """A class that represents a TMDB client.
@@ -100,9 +112,13 @@ class MovieSearch(Movie, Person):
 
         for res in movies_list:
             movie_id = res["id"]
+            
+            # get movie video infos
+            movie_videos_info = self.videos(movie_id)
+
             movie_details = self.get_details(movie_id)
 
-            new_film = MovieInfo(res, movie_details)
+            new_film = MovieInfo(res, movie_details, movie_videos_info)
             return_list.append(new_film)
 
         return return_list

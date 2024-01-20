@@ -76,6 +76,11 @@ class MovieInfo(discord.Embed):
         self.add_field(
             name="Acteurs principaux", value=acteurs
         )
+        
+        if movie_infos.trailer_key:
+            self.add_field(
+                name="Bande annonce", value=f"https://www.youtube.com/watch?v={movie_infos.trailer_key}", inline=False
+            )
 
     def get_embed(self):
         """Get the movie information embed.
