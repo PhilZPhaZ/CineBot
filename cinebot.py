@@ -6,6 +6,8 @@ class MovieInfo:
         self.poster_path = movie_info["poster_path"]
         self.release_date = movie_info["release_date"]
         self.overview = movie_info["overview"]
+        self.vote_average = movie_info["vote_average"]
+        self.vote_count = movie_info["vote_count"]
 
         self.details = movie_details
 

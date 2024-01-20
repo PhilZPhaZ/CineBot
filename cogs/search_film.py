@@ -55,6 +55,9 @@ class MovieInfo(discord.Embed):
         self.add_field(
             name="Réalisateur", value=movie_infos.director, inline=True
         )
+        self.add_field(
+            name="Note moyenne", value=f"{movie_infos.vote_average}/10 par {movie_infos.vote_count} personnes"
+        )
 
         len_overview_movie = len(movie_infos.overview)
         if len_overview_movie > 1900:
