@@ -29,4 +29,3 @@ async def on_ready():
     await bot.tree.sync()
 
 bot.run(DISCORD_TOKEN)
-        

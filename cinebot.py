@@ -1,4 +1,4 @@
-from tmdbv3api import TMDb, Movie, Credit
+from tmdbv3api import TMDb, Movie, Credit, Person
 
 class MovieInfo:
     def __init__(self, movie_info, movie_details) -> None:
@@ -8,14 +8,14 @@ class MovieInfo:
         self.overview = movie_info["overview"]
 
         self.details = movie_details
- 
+
         for person in self.details["casts"]["crew"]:
             if person["job"] == "Director":
                 self.director = person["name"]
-        
+
         self.cast = movie_details["casts"]["cast"]
         self.four_main_actor = {}
-        
+
         if len(self.cast) <= 4:
             for actor in self.cast:
                 self.four_main_actor[f"{actor['name']}"] = actor["character"]
@@ -54,7 +54,7 @@ class Client(TMDb):
         self.language = language
 
 
-class MovieSearch(Movie, Credit):
+class MovieSearch(Movie, Person):
     """A class that represents a movie.
 
     This class extends the Client and Movie classes and provides additional functionality for searching movies.
@@ -79,7 +79,7 @@ class MovieSearch(Movie, Credit):
 
         """
         Movie.__init__(self, client)
-        Credit.__init__(self, client)
+        Person.__init__(self, client)
 
     def search(self, query):
         """Search for movies.
@@ -90,10 +90,10 @@ class MovieSearch(Movie, Credit):
         Returns:
             The search results.
 
-        """
+        """     
         return_list = []
 
-        movies = super().search(query)
+        movies = self.search_movies(query)
         movies_list = list(movies)
 
         for res in movies_list:
@@ -106,4 +106,4 @@ class MovieSearch(Movie, Credit):
         return return_list
     
     def get_details(self, id):
-        return super().details(id)
+        return self.details(id)
