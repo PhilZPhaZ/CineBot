@@ -184,7 +184,6 @@ class SearchMovie(commands.Cog):
         movie: An instance of the Movie class.
 
     """
-
     def __init__(self, bot):
         """Initialize the SearchMusic cog.
 

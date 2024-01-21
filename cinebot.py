@@ -1,6 +1,7 @@
 from tmdbv3api import TMDb, Movie, Person
 import datetime
 
+
 class MovieInfo:
     """
     Represents movie information.
@@ -36,7 +37,7 @@ class MovieInfo:
         self.overview = movie_info["overview"]
         self.vote_average = movie_info["vote_average"]
         self.vote_count = movie_info["vote_count"]
-        
+
         if release_date := movie_info["release_date"]:
             date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
             self.release_date = date.strftime("%A %d %B %Y").capitalize()
@@ -49,7 +50,6 @@ class MovieInfo:
         for person in self.details["casts"]["crew"]:
             if person["job"] == "Director":
                 self.director = person["name"]
-
 
         self.cast = movie_details["casts"]["cast"]
         self.four_main_actor = {}
@@ -68,6 +68,7 @@ class MovieInfo:
         for video in movie_videos_info.results:
             if video["type"] == 'Trailer':
                 self.trailer_key = video["key"]
+
 
 class Client(TMDb):
     """A class that represents a TMDB client.
@@ -134,7 +135,7 @@ class MovieSearch(Movie, Person):
         Returns:
             The search results.
 
-        """     
+        """
         return_list = []
 
         try:
@@ -143,7 +144,7 @@ class MovieSearch(Movie, Person):
 
             for res in movies_list:
                 movie_id = res["id"]
-                
+
                 # get movie video infos
                 movie_videos_info = self.videos(movie_id)
 
@@ -153,8 +154,8 @@ class MovieSearch(Movie, Person):
                 return_list.append(new_film)
 
             return return_list
-        except:
+        except Exception:
             return None
-    
+
     def get_details(self, id):
         return self.details(id)
