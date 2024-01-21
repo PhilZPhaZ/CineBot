@@ -213,21 +213,32 @@ class SearchMovie(commands.Cog):
         await interaction.response.defer()
         
         self.result = self.movie.search(nom_du_film)
-        top_10_results = self.result[:10]
-        emb = discord.Embed(
-            title="Resultats - 10 films les plus populaires",
-            color=discord.Color.from_rgb(69, 44, 129),
-        )
-        for i, res in enumerate(top_10_results):
-            emb.add_field(
-                name=f"{i+1} - {res.title}",
-                value=f"[Poster de : {res.title}](https://image.tmdb.org/t/p/w500{res.poster_path})",
-                inline=False,
+        if self.result:
+            top_10_results = self.result[:10]
+            emb = discord.Embed(
+                title="Resultats - 10 films les plus populaires",
+                color=discord.Color.from_rgb(69, 44, 129),
             )
+            for i, res in enumerate(top_10_results):
+                emb.add_field(
+                    name=f"{i+1} - {res.title}",
+                    value=f"[Poster de : {res.title}](https://image.tmdb.org/t/p/w500{res.poster_path})",
+                    inline=False,
+                )
 
-        await interaction.followup.send(
-            embed=emb, view=SelectView(top_10_results)
-        )
+            await interaction.followup.send(
+                embed=emb, view=SelectView(top_10_results)
+            )
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucun film trouvé pour cette recherche: ***{nom_du_film}***"
+            )
+            await interaction.followup.send(embed=emb_error)   
 
     @app_commands.command()
     async def info(self, interaction, nom_du_film: str):
@@ -244,9 +255,20 @@ class SearchMovie(commands.Cog):
         await interaction.response.defer()
         
         self.result = self.movie.search(nom_du_film)
-        top_movie = self.result[0]
+        if self.result:
+            top_movie = self.result[0]
 
-        await interaction.followup.send(embed=MovieInfo(top_movie).get_embed())
+            await interaction.followup.send(embed=MovieInfo(top_movie).get_embed())
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucun film trouvé pour cette recherche: ***{nom_du_film}***"
+            )
+            await interaction.followup.send(embed=emb_error)     
 
 
 async def setup(bot):

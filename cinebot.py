@@ -37,16 +37,19 @@ class MovieInfo:
         self.vote_average = movie_info["vote_average"]
         self.vote_count = movie_info["vote_count"]
         
-        release_date = movie_info["release_date"]
-        date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
-        self.release_date = date.strftime("%A %d %B %Y").capitalize()
+        if release_date := movie_info["release_date"]:
+            date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
+            self.release_date = date.strftime("%A %d %B %Y").capitalize()
 
         # cast
         self.details = movie_details
 
+        # Realisateur
+        self.director = "Pas de realisateur"
         for person in self.details["casts"]["crew"]:
             if person["job"] == "Director":
                 self.director = person["name"]
+
 
         self.cast = movie_details["casts"]["cast"]
         self.four_main_actor = {}
@@ -59,7 +62,7 @@ class MovieInfo:
                 for actor in self.cast:
                     if int(actor["order"]) == i:
                         self.four_main_actor[f"{actor['name']}"] = actor["character"]
-        
+
         # video
         self.trailer_key = None
         for video in movie_videos_info.results:
@@ -134,21 +137,24 @@ class MovieSearch(Movie, Person):
         """     
         return_list = []
 
-        movies = self.search_movies(query)
-        movies_list = list(movies)
+        try:
+            movies = self.search_movies(query)
+            movies_list = list(movies)
 
-        for res in movies_list:
-            movie_id = res["id"]
-            
-            # get movie video infos
-            movie_videos_info = self.videos(movie_id)
+            for res in movies_list:
+                movie_id = res["id"]
+                
+                # get movie video infos
+                movie_videos_info = self.videos(movie_id)
 
-            movie_details = self.get_details(movie_id)
+                movie_details = self.get_details(movie_id)
 
-            new_film = MovieInfo(res, movie_details, movie_videos_info)
-            return_list.append(new_film)
+                new_film = MovieInfo(res, movie_details, movie_videos_info)
+                return_list.append(new_film)
 
-        return return_list
+            return return_list
+        except:
+            return None
     
     def get_details(self, id):
         return self.details(id)
