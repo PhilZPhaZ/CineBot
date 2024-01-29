@@ -14,7 +14,7 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 class CineBot(commands.Bot):
     def __init__(self):
-        self.EXTENSIONS = ("cogs.search_film",)
+        self.EXTENSIONS = ("cogs.search_info",)
         intents = discord.Intents.all()
         intents.message_content = True
 

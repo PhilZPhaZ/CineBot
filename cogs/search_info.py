@@ -1,6 +1,6 @@
 from discord import app_commands
 from discord.ext import commands
-from cinebot import MovieSearch, MovieInfo, Client
+from cinebot import InfoSearch, Client
 from dotenv import load_dotenv
 import os
 import discord
@@ -143,7 +143,7 @@ class MovieSelection(discord.ui.Select):
         await interaction.response.send_message(embed=MovieInfo(movie).get_embed())
 
 
-class SelectView(discord.ui.View):
+class SelectViewMovie(discord.ui.View):
     """A class that represents a select view.
 
     This class extends the discord.ui.View class and provides a view with a movie selection dropdown.
@@ -195,10 +195,10 @@ class SearchMovie(commands.Cog):
         load_dotenv()
         API_KEY_TMDB = os.getenv("API_KEY_TMDB")
         self.client = Client(API_KEY_TMDB)
-        self.movie = MovieSearch(self.client)
+        self.info = InfoSearch(self.client)
 
     @app_commands.command()
-    async def search(self, interaction: discord.Interaction, nom_du_film: str):
+    async def search_film(self, interaction: discord.Interaction, nom_du_film: str):
         """Search for movies and display the top 10 results with their posters.
 
         Args:
@@ -211,7 +211,7 @@ class SearchMovie(commands.Cog):
         """
         await interaction.response.defer()
         
-        self.result = self.movie.search(nom_du_film)
+        self.result = self.movie.search_movies(nom_du_film)
         if self.result:
             top_10_results = self.result[:10]
             emb = discord.Embed(
@@ -226,7 +226,7 @@ class SearchMovie(commands.Cog):
                 )
 
             await interaction.followup.send(
-                embed=emb, view=SelectView(top_10_results)
+                embed=emb, view=SelectViewMovie(top_10_results)
             )
         else:
             emb_error = discord.Embed(
@@ -237,10 +237,10 @@ class SearchMovie(commands.Cog):
                 name=":warning: Erreur :warning:",
                 value=f"Aucun film trouvé pour cette recherche: ***{nom_du_film}***"
             )
-            await interaction.followup.send(embed=emb_error)   
+            await interaction.followup.send(embed=emb_error)
 
     @app_commands.command()
-    async def info(self, interaction, nom_du_film: str):
+    async def info_film(self, interaction, nom_du_film: str):
         """Search for movies and display the top 10 results with their posters.
 
         Args:
@@ -253,7 +253,7 @@ class SearchMovie(commands.Cog):
         """
         await interaction.response.defer()
         
-        self.result = self.movie.search(nom_du_film)
+        self.result = self.info.search_movies(nom_du_film)
         if self.result:
             top_movie = self.result[0]
 
@@ -267,7 +267,39 @@ class SearchMovie(commands.Cog):
                 name=":warning: Erreur :warning:",
                 value=f"Aucun film trouvé pour cette recherche: ***{nom_du_film}***"
             )
-            await interaction.followup.send(embed=emb_error)     
+            await interaction.followup.send(embed=emb_error)
+    
+    @app_commands.command()
+    async def search_person(self, interaction, nom_de_la_personne: str):
+        await interaction.response.defer()
+        
+        self.result = self.info.search_persons(nom_de_la_personne)
+        if self.result:
+            top_10_results = self.result[:10]
+            emb = discord.Embed(
+                title="Resultats - 10 personnes les plus populaires",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            for i, res in enumerate(top_10_results):
+                emb.add_field(
+                    name=f"{i+1} - {res.name}",
+                    value=f"[Poster de : {res.name}](https://image.tmdb.org/t/p/w500{res.profile_path})",
+                    inline=False,
+                )
+
+            await interaction.followup.send(
+                embed=emb,
+            )
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucune personne trouvée pour cette recherche: ***{nom_de_la_personne}***"
+            )
+            await interaction.followup.send(embed=emb_error)
 
 
 async def setup(bot):

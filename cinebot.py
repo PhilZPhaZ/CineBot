@@ -70,6 +70,12 @@ class MovieInfo:
                 self.trailer_key = video["key"]
 
 
+class PersonInfo:
+    def __init__(self, person_info, person_details) -> None:
+        self.name = person_info["name"]
+        self.profile_path = person_info["profile_path"]
+
+
 class Client(TMDb):
     """A class that represents a TMDB client.
 
@@ -99,7 +105,7 @@ class Client(TMDb):
         self.language = language
 
 
-class MovieSearch(Movie, Person):
+class InfoSearch(Movie, Person):
     """A class that represents a movie.
 
     This class extends the Client and Movie classes and provides additional functionality for searching movies.
@@ -126,7 +132,7 @@ class MovieSearch(Movie, Person):
         Movie.__init__(self, client)
         Person.__init__(self, client)
 
-    def search(self, query):
+    def search_movies(self, query):
         """Search for movies.
 
         Args:
@@ -148,14 +154,32 @@ class MovieSearch(Movie, Person):
                 # get movie video infos
                 movie_videos_info = self.videos(movie_id)
 
-                movie_details = self.get_details(movie_id)
+                movie_details = self.get_details_film(movie_id)
 
                 new_film = MovieInfo(res, movie_details, movie_videos_info)
                 return_list.append(new_film)
-
             return return_list
         except Exception:
             return None
 
-    def get_details(self, id):
-        return self.details(id)
+    def get_details_film(self, id):
+        return self.details_film(id)
+
+    def search_persons(self, query):
+        return_list = []
+
+        persons = self.search_person(query)
+        persons_list = list(persons)
+
+        for res in persons_list:
+            print(res)
+            person_id = res['id']
+            
+            person_details = self.get_details_person(person_id)
+
+            new_person = PersonInfo(res, person_details)
+            return_list.append(new_person)
+    
+    def get_details_person(self, id):
+        return self.details_person(id)
+
