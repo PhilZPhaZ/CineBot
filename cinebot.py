@@ -1,5 +1,6 @@
 from tmdbv3api import TMDb, Movie, Person
 import datetime
+import json
 
 
 class MovieInfo:
@@ -75,6 +76,8 @@ class PersonInfo:
         self.name = person_info["name"]
         self.profile_path = person_info["profile_path"]
 
+        self.details = person_details
+
 
 class Client(TMDb):
     """A class that represents a TMDB client.
@@ -142,10 +145,10 @@ class InfoSearch(Movie, Person):
             The search results.
 
         """
-        return_list = []
-
         try:
-            movies = self.search_movies(query)
+            return_list = []
+
+            movies = self.get_movie_infos(query)
             movies_list = list(movies)
 
             for res in movies_list:
@@ -166,20 +169,23 @@ class InfoSearch(Movie, Person):
         return self.details_film(id)
 
     def search_persons(self, query):
-        return_list = []
+        try:
+            return_list = []
 
-        persons = self.search_person(query)
-        persons_list = list(persons)
+            persons = self.get_person_infos(query)
+            persons_list = list(persons)
 
-        for res in persons_list:
-            print(res)
-            person_id = res['id']
+            for res in persons_list:
+                person_id = res['id']
+                
+                person_details = self.get_details_person(int(person_id))
             
-            person_details = self.get_details_person(person_id)
-
-            new_person = PersonInfo(res, person_details)
-            return_list.append(new_person)
+                new_person = PersonInfo(res, person_details)
+                return_list.append(new_person)
+            return return_list
+        except Exception:
+            return None
     
     def get_details_person(self, id):
-        return self.details_person(id)
+        return self.combined_credits_person(id)
 

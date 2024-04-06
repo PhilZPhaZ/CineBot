@@ -5,8 +5,11 @@ from dotenv import load_dotenv
 import os
 import discord
 
+
+# --------------------------- Movie ------------------------------
 class MovieInfo(discord.Embed):
-    """A class that represents a movie information embed.
+    """
+    A class that represents a movie information embed.
 
     This class extends the discord.Embed class and provides an embed with movie information.
     It sets the title, color, thumbnail, release date, and synopsis fields of the embed.
@@ -22,17 +25,16 @@ class MovieInfo(discord.Embed):
 
     Methods:
         get_embed: Get the movie information embed.
-
     """
 
     def __init__(self, movie_infos, *args, **kwargs):
-        """Initialize the MovieInfo embed.
+        """
+        Initialize the MovieInfo embed.
 
         Args:
             movie_infos: The movie information object.
             *args: Additional arguments to pass to the discord.Embed constructor.
             **kwargs: Additional keyword arguments to pass to the discord.Embed constructor.
-
         """
         super().__init__(*args, **kwargs)
         self.title = movie_infos.title
@@ -75,25 +77,25 @@ class MovieInfo(discord.Embed):
         self.add_field(
             name="Acteurs principaux", value=acteurs
         )
-        
+
         if movie_infos.trailer_key:
             self.add_field(
                 name="Bande annonce", value=f"https://www.youtube.com/watch?v={movie_infos.trailer_key}", inline=False
             )
 
     def get_embed(self):
-        """Get the movie information embed.
+        """
+        Get the movie information embed.
 
         Returns:
             The movie information embed.
-
         """
-
         return self
 
 
 class MovieSelection(discord.ui.Select):
-    """A class that represents a movie selection dropdown.
+    """
+    A class that represents a movie selection dropdown.
 
     This class extends the discord.ui.Select class and provides a dropdown menu for selecting a movie.
     It takes a list of movies as input and creates options for each movie in the dropdown.
@@ -106,15 +108,14 @@ class MovieSelection(discord.ui.Select):
 
     Methods:
         callback: The callback method that sends a message with movie information when a movie is selected.
-
     """
 
     def __init__(self, list_movie):
-        """Initialize the MovieSelection dropdown.
+        """
+        Initialize the MovieSelection dropdown.
 
         Args:
             list_movie: The list of movies to populate the dropdown options.
-
         """
         options = [
             discord.SelectOption(label=f"{list_movie[i].title}", value=f"{i}")
@@ -130,21 +131,22 @@ class MovieSelection(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
-        """The callback method that sends a message with movie information when a movie is selected.
+        """
+        The callback method that sends a message with movie information when a movie is selected.
 
         Args:
             interaction: The interaction object.
 
         Returns:
             None
-
         """
         movie = self.list_movie[int(self.values[0])]
         await interaction.response.send_message(embed=MovieInfo(movie).get_embed())
 
 
 class SelectViewMovie(discord.ui.View):
-    """A class that represents a select view.
+    """
+    A class that represents a select view.
 
     This class extends the discord.ui.View class and provides a view with a movie selection dropdown.
     It takes a list of movies as input and adds a MovieSelection item to the view.
@@ -155,23 +157,108 @@ class SelectViewMovie(discord.ui.View):
 
     Methods:
         None
-
     """
 
     def __init__(self, list_movie, timeout=60):
-        """Initialize the SelectView.
+        """
+        Initialize the SelectView.
 
         Args:
             timeout: The timeout duration for the view (default is 60 seconds).
             list_movie: The list of movies to populate the dropdown options.
-
         """
         super().__init__(timeout=timeout)
         self.add_item(MovieSelection(list_movie))
 
 
-class SearchMovie(commands.Cog):
-    """A class that represents a search music cog.
+# ----------------------------- Person ----------------------------------------
+class PersonInfo(discord.Embed):
+    def __init__(self, person_infos, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = person_infos.name
+        self.color = discord.Color.from_rgb(69, 44, 129)
+        
+        self.set_thumbnail(
+            url=f"https://image.tmdb.org/t/p/w500{person_infos.profile_path}"
+        )
+
+
+    def get_embed(self):
+        return self
+
+class PersonSelection(discord.ui.Select):
+    """
+    A class that represents a movie selection dropdown.
+
+    This class extends the discord.ui.Select class and provides a dropdown menu for selecting a movie.
+    It takes a list of movies as input and creates options for each movie in the dropdown.
+
+    Args:
+        list_movie: The list of movies to populate the dropdown options.
+
+    Attributes:
+        list_movie: The list of movies.
+
+    Methods:
+        callback: The callback method that sends a message with movie information when a movie is selected.
+    """
+
+    def __init__(self, list_person):
+        """
+        Initialize the MovieSelection dropdown.
+
+        Args:
+            list_person: The list of movies to populate the dropdown options.
+        """
+        options = [
+            discord.SelectOption(label=f"{list_person[i].name}", value=f"{i}")
+            for i in range(len(list_person))
+        ]
+        self.list_person = list_person
+
+        super().__init__(
+            placeholder="Selectionne une personne pour des informations",
+            max_values=1,
+            min_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        """
+        The callback method that sends a message with movie information when a movie is selected.
+
+        Args:
+            interaction: The interaction object.
+
+        Returns:
+            None
+        """
+        person = self.list_person[int(self.values[0])]
+        await interaction.response.send_message(embed=PersonInfo(person).get_embed())
+
+
+class SelectViewPerson(discord.ui.View):
+    """
+    A class that represents a select view.
+
+    This class extends the discord.ui.View class and provides a view with a movie selection dropdown.
+    It takes a list of movies as input and adds a MovieSelection item to the view.
+
+    Args:
+        timeout: The timeout duration for the view (default is 60 seconds).
+        list_person: The list of movies to populate the dropdown options.
+
+    Methods:
+        None
+    """
+
+    def __init__(self, list_person, timeout=60):
+        super().__init__(timeout=timeout)
+        self.add_item(PersonSelection(list_person))
+
+class Search(commands.Cog):
+    """
+    A class that represents a search music cog.
 
     This cog provides functionality to search for movies using the TMDB API.
     It includes a method to get the image URL from a movie result and a command to search for movies and display the top 10 results with their posters.
@@ -182,14 +269,13 @@ class SearchMovie(commands.Cog):
     Attributes:
         bot: The instance of the bot.
         movie: An instance of the Movie class.
-
     """
     def __init__(self, bot):
-        """Initialize the SearchMusic cog.
+        """
+        Initialize the SearchMusic cog.
 
         Args:
             bot: The instance of the bot.
-
         """
         self.bot = bot
         load_dotenv()
@@ -199,7 +285,8 @@ class SearchMovie(commands.Cog):
 
     @app_commands.command()
     async def search_film(self, interaction: discord.Interaction, nom_du_film: str):
-        """Search for movies and display the top 10 results with their posters.
+        """
+        Search for movies and display the top 10 results with their posters.
 
         Args:
             interaction: The interaction object.
@@ -207,11 +294,10 @@ class SearchMovie(commands.Cog):
 
         Returns:
             None
-
         """
         await interaction.response.defer()
-        
-        self.result = self.movie.search_movies(nom_du_film)
+
+        self.result = self.info.search_movies(nom_du_film)
         if self.result:
             top_10_results = self.result[:10]
             emb = discord.Embed(
@@ -241,7 +327,8 @@ class SearchMovie(commands.Cog):
 
     @app_commands.command()
     async def info_film(self, interaction, nom_du_film: str):
-        """Search for movies and display the top 10 results with their posters.
+        """
+        Search for movies and display the top 10 results with their posters.
 
         Args:
             interaction: The interaction object.
@@ -249,10 +336,9 @@ class SearchMovie(commands.Cog):
 
         Returns:
             None
-
         """
         await interaction.response.defer()
-        
+
         self.result = self.info.search_movies(nom_du_film)
         if self.result:
             top_movie = self.result[0]
@@ -268,11 +354,11 @@ class SearchMovie(commands.Cog):
                 value=f"Aucun film trouvé pour cette recherche: ***{nom_du_film}***"
             )
             await interaction.followup.send(embed=emb_error)
-    
+
     @app_commands.command()
     async def search_person(self, interaction, nom_de_la_personne: str):
         await interaction.response.defer()
-        
+
         self.result = self.info.search_persons(nom_de_la_personne)
         if self.result:
             top_10_results = self.result[:10]
@@ -283,12 +369,12 @@ class SearchMovie(commands.Cog):
             for i, res in enumerate(top_10_results):
                 emb.add_field(
                     name=f"{i+1} - {res.name}",
-                    value=f"[Poster de : {res.name}](https://image.tmdb.org/t/p/w500{res.profile_path})",
+                    value=f"[Image de : {res.name}](https://image.tmdb.org/t/p/w500{res.profile_path})",
                     inline=False,
                 )
 
             await interaction.followup.send(
-                embed=emb,
+                embed=emb, view=SelectViewPerson(top_10_results)
             )
         else:
             emb_error = discord.Embed(
@@ -300,7 +386,27 @@ class SearchMovie(commands.Cog):
                 value=f"Aucune personne trouvée pour cette recherche: ***{nom_de_la_personne}***"
             )
             await interaction.followup.send(embed=emb_error)
+    
+    @app_commands.command()
+    async def info_person(self, interaction, nom_de_la_personne: str):
+        await interaction.response.defer()
+
+        self.result = self.info.search_persons(nom_de_la_personne)
+        if self.result:
+            top_person = self.result[0]
+
+            await interaction.followup.send(embed=PersonInfo(top_person).get_embed())
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucune personne trouvé pour cette recherche: ***{nom_de_la_personne}***"
+            )
+            await interaction.followup.send(embed=emb_error)
 
 
 async def setup(bot):
-    await bot.add_cog(SearchMovie(bot))
+    await bot.add_cog(Search(bot))
