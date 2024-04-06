@@ -1,3 +1,4 @@
+import contextlib
 from discord import app_commands
 from discord.ext import commands
 from cinebot import InfoSearch, Client
@@ -213,9 +214,8 @@ class PersonInfo(discord.Embed):
                 try:
                     played_in_list.append(movie_dict["title"])
                 except KeyError:
-                    self.add_field(
-                        name="Connus pour :", value="Cette personne n'a pas joué dans un film", inline=True
-                    )
+                    with contextlib.suppress(Exception):
+                        played_in_list.append(movie_dict["name"])
 
             played_in = "\n".join(played_in_list)
 

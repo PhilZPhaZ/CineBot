@@ -97,24 +97,25 @@ class PersonInfo:
             self.known_for = None
         
         # 5 best created movies
+        try:
+            all_movies = list(person_details["crew"])
 
-        """all_movies = list(person_details["crew"])
+            self.created_movies = sorted(all_movies, key=lambda x: self.best_ratio_for_movie(x["vote_count"], x["vote_average"]), reverse=True)
 
-        self.created_movies = sorted(all_movies, key=lambda x: self.best_ratio_for_movie(x["vote_count"], x["vote_average"]), reverse=True)
-
-        # enleve les doublons
-        final_list = []
-        name_list = []
-        for movie in self.created_movies:
-            if movie["title"] not in name_list:
-                final_list.append(movie)
-                name_list.append(movie["title"])
-
-        self.created_movies = final_list
-
-        if len(self.created_movies) > 5:
-            self.created_movies = self.created_movies[:5]"""
-        self.created_movies = []
+            # enlever les doublons
+            final_list = []
+            name_list = []
+            for movie in self.created_movies:
+                if movie["id"] not in name_list:
+                    final_list.append(movie)
+                    name_list.append(movie["id"])
+            
+            self.created_movies = final_list
+            
+            if len(self.created_movies) > 5:
+                self.created_movies = self.created_movies[:5]
+        except Exception:
+            self.created_movies = None
 
 
         # biography
