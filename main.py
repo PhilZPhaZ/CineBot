@@ -41,6 +41,10 @@ async def on_ready():
         )
     )
 
-    await bot.tree.sync()
+@bot.tree.command()
+@commands.is_owner()
+async def sync(interaction):
+    synced = await bot.tree.sync()
+    await interaction.response.send_message(f"Synced {synced} commands")
 
 bot.run(DISCORD_TOKEN)
