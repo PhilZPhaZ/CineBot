@@ -72,11 +72,59 @@ class MovieInfo:
 
 
 class PersonInfo:
-    def __init__(self, person_info, person_details) -> None:
+    def __init__(self, person_info, infos, person_details) -> None:
         self.name = person_info["name"]
         self.profile_path = person_info["profile_path"]
+        self.jobs = infos["known_for_department"]
 
-        self.details = person_details
+        # Birthday
+        if birthday := infos["birthday"]:
+            date = datetime.datetime.strptime(birthday, "%Y-%m-%d")
+            self.birthday = date.strftime("%A %d %B %Y").capitalize()
+
+        # Place of birth
+        if place_of_birth := infos["place_of_birth"]:
+            self.place_of_birth = place_of_birth
+
+        # 5 best movies
+        try:
+            all_movies = list(person_details["cast"])
+
+            self.known_for = sorted(all_movies, key=lambda x: self.best_ratio_for_movie(x["vote_count"], x["vote_average"]), reverse=True)
+            if len(self.known_for) > 5:
+                self.known_for = self.known_for[:5]
+        except Exception:
+            self.known_for = None
+        
+        # 5 best created movies
+
+        """all_movies = list(person_details["crew"])
+
+        self.created_movies = sorted(all_movies, key=lambda x: self.best_ratio_for_movie(x["vote_count"], x["vote_average"]), reverse=True)
+
+        # enleve les doublons
+        final_list = []
+        name_list = []
+        for movie in self.created_movies:
+            if movie["title"] not in name_list:
+                final_list.append(movie)
+                name_list.append(movie["title"])
+
+        self.created_movies = final_list
+
+        if len(self.created_movies) > 5:
+            self.created_movies = self.created_movies[:5]"""
+        self.created_movies = []
+
+
+        # biography
+        try:
+            self.biography = infos["biography"]
+        except Exception:
+            self.biography = "Pas de biographie"
+
+    def best_ratio_for_movie(self, vote_count, vote):
+        return vote * vote_count
 
 
 class Client(TMDb):
@@ -177,10 +225,11 @@ class InfoSearch(Movie, Person):
 
             for res in persons_list:
                 person_id = res['id']
-                
-                person_details = self.get_details_person(int(person_id))
-            
-                new_person = PersonInfo(res, person_details)
+
+                person_infos = self.get_infos_from_the_person(int(person_id))
+                person_details = self.combined_credits_person(int(person_id))
+
+                new_person = PersonInfo(res, person_infos, person_details)
                 return_list.append(new_person)
             return return_list
         except Exception:
@@ -188,4 +237,3 @@ class InfoSearch(Movie, Person):
     
     def get_details_person(self, id):
         return self.combined_credits_person(id)
-

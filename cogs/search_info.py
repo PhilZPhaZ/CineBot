@@ -61,9 +61,9 @@ class MovieInfo(discord.Embed):
         )
 
         len_overview_movie = len(movie_infos.overview)
-        if len_overview_movie > 1900:
+        if len_overview_movie > 1020:
             self.add_field(
-                name="Synopsis", value=f"{movie_infos.overview[:1900]}...", inline=False
+                name="Synopsis", value=f"{movie_infos.overview[:1020]}...", inline=False
             )
         else:
             self.add_field(
@@ -177,11 +177,69 @@ class PersonInfo(discord.Embed):
         super().__init__(*args, **kwargs)
         self.title = person_infos.name
         self.color = discord.Color.from_rgb(69, 44, 129)
-        
-        self.set_thumbnail(
-            url=f"https://image.tmdb.org/t/p/w500{person_infos.profile_path}"
+
+        if person_infos.profile_path:
+            self.set_thumbnail(
+                url=f"https://image.tmdb.org/t/p/w500{person_infos.profile_path}"
+            )
+
+        # Birthday
+        birthday = person_infos.birthday or "Inconnu"
+        self.add_field(
+            name="Date de naissance", value=f"{birthday}", inline=True
         )
 
+        # Place of birth
+        place_of_birth = person_infos.place_of_birth or "Inconnu"
+        self.add_field(
+            name="Lieu de naissance", value=place_of_birth, inline=True
+        )
+
+        # biography
+        if len(person_infos.biography) > 1020:
+            self.add_field(
+                name="Biographie", value=f"{person_infos.biography[:1020]}...",  inline=False
+            )
+        else:
+            self.add_field(
+                name="Biographie", value=f"{person_infos.biography}",  inline=False
+            )
+
+        # Played in
+        if _ := person_infos.known_for:
+            played_in_list = []
+            for movie in person_infos.known_for:
+                movie_dict = dict(movie)
+                try:
+                    played_in_list.append(movie_dict["title"])
+                except KeyError:
+                    self.add_field(
+                        name="Connus pour :", value="Cette personne n'a pas joué dans un film", inline=True
+                    )
+
+            played_in = "\n".join(played_in_list)
+
+            self.add_field(
+                name="Connus pour :", value=played_in, inline=True
+            )
+        else:
+            self.add_field(
+                name="Connus pour :", value="Cette personne n'a pas joué dans un film", inline=True
+            )
+
+
+        # Made movies
+        if _ := person_infos.created_movies:
+            played_in_list = [film["title"] for film in person_infos.created_movies]
+            played_in = "\n".join(played_in_list)
+
+            self.add_field(
+                name="A réalisé :", value=played_in, inline=True
+            )
+        else:
+            self.add_field(
+                name="Connus pour :", value="Cette personne n'a pas produit de films", inline=True
+            )
 
     def get_embed(self):
         return self
