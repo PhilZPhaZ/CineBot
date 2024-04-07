@@ -72,6 +72,18 @@ class MovieInfo:
 
 
 class PersonInfo:
+    """
+    Summary: Represents a class for storing information about a person.
+
+    Explanation: Initializes the class with details about a person, including their name, profile path, jobs, birthday, place of birth, top 5 known movies, top 5 created movies, and biography. The class provides methods for sorting movies based on vote count and average.
+
+    Args:
+    - person_info: Information about the person.
+    - infos: Additional details about the person.
+    - person_details: Details about the person's movies and biography.
+
+    Returns: None
+    """
     def __init__(self, person_info, infos, person_details) -> None:
         self.name = person_info["name"]
         self.profile_path = person_info["profile_path"]
@@ -206,7 +218,7 @@ class InfoSearch(Movie, Person):
                 # get movie video infos
                 movie_videos_info = self.videos(movie_id)
 
-                movie_details = self.get_details_film(movie_id)
+                movie_details = self.details_film(movie_id)
 
                 new_film = MovieInfo(res, movie_details, movie_videos_info)
                 return_list.append(new_film)
@@ -214,10 +226,18 @@ class InfoSearch(Movie, Person):
         except Exception:
             return None
 
-    def get_details_film(self, id):
-        return self.details_film(id)
-
     def search_persons(self, query):
+        """
+        Summary: Retrieves detailed information about multiple persons.
+
+        Explanation: Retrieves and combines information about multiple persons based on the provided query. Creates instances of PersonInfo for each person and returns a list of the gathered information.
+
+        Args:
+        - query: The query used to search for persons.
+
+        Returns:
+        - List: A list of PersonInfo instances for each person found, or None if an exception occurs.
+        """
         try:
             return_list = []
 
@@ -235,6 +255,3 @@ class InfoSearch(Movie, Person):
             return return_list
         except Exception:
             return None
-    
-    def get_details_person(self, id):
-        return self.combined_credits_person(id)

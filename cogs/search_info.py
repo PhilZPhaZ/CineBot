@@ -174,7 +174,32 @@ class SelectViewMovie(discord.ui.View):
 
 # ----------------------------- Person ----------------------------------------
 class PersonInfo(discord.Embed):
+    """
+    Summary: Represents a Discord embed for displaying information about a person.
+
+    Explanation: Initializes a Discord embed with information about a person, including their name, profile picture, birthday, place of birth, biography, movies they played in, and movies they created. Provides a method to retrieve the embed.
+
+    Args:
+    - person_infos: Information about the person.
+    - *args: Additional arguments for the Discord embed.
+    - **kwargs: Additional keyword arguments for the Discord embed.
+
+    Returns:
+    - Discord embed: An embed containing the person's information.
+    """
     def __init__(self, person_infos, *args, **kwargs):
+        """
+        Summary: Initializes a new instance of a class with provided person information and additional arguments.
+
+        Explanation: Constructor for the class that initializes a new instance with person information and any additional arguments passed to it.
+
+        Args:
+        - person_infos: Information about the person.
+        - *args: Additional positional arguments.
+        - **kwargs: Additional keyword arguments.
+
+        Returns: None
+        """
         super().__init__(*args, **kwargs)
         self.title = person_infos.name
         self.color = discord.Color.from_rgb(69, 44, 129)
@@ -242,6 +267,15 @@ class PersonInfo(discord.Embed):
             )
 
     def get_embed(self):
+        """
+        Summary: Represents a class for selecting a person.
+
+        Explanation: This class is used for selecting a person, but the provided code snippet is incomplete and does not provide further details for the class.
+
+        Args: None
+
+        Returns: None
+        """
         return self
 
 class PersonSelection(discord.ui.Select):
@@ -311,6 +345,16 @@ class SelectViewPerson(discord.ui.View):
     """
 
     def __init__(self, list_person, timeout=60):
+        """
+        Summary: Represents a class for searching.
+
+        Explanation: This class is used for searching, but the provided code snippet is incomplete and does not provide further details for the class.
+
+        Args: None
+
+        Returns: None
+        """
+
         super().__init__(timeout=timeout)
         self.add_item(PersonSelection(list_person))
 
@@ -415,6 +459,17 @@ class Search(commands.Cog):
 
     @app_commands.command()
     async def search_person(self, interaction, nom_de_la_personne: str):
+        """
+        Summary: Command function for searching a person.
+
+        Explanation: Handles the search for a person based on the provided name. Displays the top 10 most popular results with their names and profile images in an embed. If no results are found, an error message is displayed.
+
+        Args:
+        - interaction: The interaction object.
+        - nom_de_la_personne: The name of the person to search for.
+
+        Returns: None
+        """
         await interaction.response.defer()
 
         self.result = self.info.search_persons(nom_de_la_personne)
@@ -447,6 +502,17 @@ class Search(commands.Cog):
     
     @app_commands.command()
     async def info_person(self, interaction, nom_de_la_personne: str):
+        """
+        Summary: Asynchronous function for retrieving information about a person.
+
+        Explanation: Retrieves information about a person based on the provided name. Sends an embed with the person's details if found, otherwise sends an error message.
+
+        Args:
+        - interaction: The interaction object.
+        - nom_de_la_personne: The name of the person to retrieve information for.
+
+        Returns: None
+        """
         await interaction.response.defer()
 
         self.result = self.info.search_persons(nom_de_la_personne)
