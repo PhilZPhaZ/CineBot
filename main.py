@@ -4,6 +4,7 @@ from cinebot import Client
 import os
 import discord
 import locale
+import asyncio
 
 locale.setlocale(locale.LC_ALL, "fr")
 load_dotenv()
@@ -44,7 +45,10 @@ async def on_ready():
 @bot.tree.command()
 @commands.is_owner()
 async def sync(interaction):
+    await interaction.response.defer()
     synced = await bot.tree.sync()
-    await interaction.response.send_message(f"Synced {synced} commands")
+    msg = await interaction.followup.send(f"Synced {synced} commands")
+    await asyncio.sleep(10)
+    await msg.delete()
 
 bot.run(DISCORD_TOKEN)
