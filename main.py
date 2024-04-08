@@ -3,10 +3,8 @@ from discord.ext import commands
 from cinebot import Client
 import os
 import discord
-import locale
 import asyncio
 
-locale.setlocale(locale.LC_ALL, "fr")
 load_dotenv()
 
 API_KEY_TMDB = os.getenv("API_KEY_TMDB")

@@ -1,6 +1,6 @@
 from tmdbv3api import TMDb, Movie, Person
+from babel.dates import format_date
 import datetime
-import json
 
 
 class MovieInfo:
@@ -41,7 +41,7 @@ class MovieInfo:
 
         if release_date := movie_info["release_date"]:
             date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
-            self.release_date = date.strftime("%A %d %B %Y").capitalize()
+            self.release_date = format_date(date, format="full", locale="fr_FR")
 
         # cast
         self.details = movie_details
@@ -92,7 +92,7 @@ class PersonInfo:
         # Birthday
         if birthday := infos["birthday"]:
             date = datetime.datetime.strptime(birthday, "%Y-%m-%d")
-            self.birthday = date.strftime("%A %d %B %Y").capitalize()
+            self.birthday = format_date(date, format="full", locale="fr_FR")
 
         # Place of birth
         if place_of_birth := infos["place_of_birth"]:
