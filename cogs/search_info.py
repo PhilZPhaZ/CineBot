@@ -238,7 +238,7 @@ class PersonInfo(discord.Embed):
                 movie_dict = dict(movie)
                 try:
                     played_in_list.append(movie_dict["title"])
-                except KeyError:
+                except Exception:
                     with contextlib.suppress(Exception):
                         played_in_list.append(movie_dict["name"])
 
@@ -255,7 +255,15 @@ class PersonInfo(discord.Embed):
 
         # Made movies
         if _ := person_infos.created_movies:
-            played_in_list = [film["title"] for film in person_infos.created_movies]
+            played_in_list = []
+
+            for film in person_infos.created_movies:
+                try:
+                    played_in_list.append(film["title"])
+                except Exception:
+                    with contextlib.suppress(KeyError):
+                        played_in_list.append(film["name"])
+
             played_in = "\n".join(played_in_list)
 
             self.add_field(
