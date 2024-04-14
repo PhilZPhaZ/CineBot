@@ -156,7 +156,7 @@ class TVInfo:
         # creator
         self.creator = "Actuellement pas de createur"
         with contextlib.suppress(Exception):
-            self.creator = tv_details["created_by"]["name"]
+            self.creator = tv_details["created_by"]
 
         # cast
         self.cast = tv_details["credits"]["cast"]
@@ -176,6 +176,12 @@ class TVInfo:
         for video in tv_details["videos"]["results"]:
             if video["type"] == "Trailer":
                 self.trailer_key = video["key"]
+        
+        # seasons infos
+        self.number_of_seasons = 0
+        for season in tv_details["seasons"]:
+            if season["season_number"] > 0:
+                self.number_of_seasons += 1
 
 
 class Client(TMDb):

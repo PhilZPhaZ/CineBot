@@ -395,9 +395,12 @@ class TVInfo(discord.Embed):
                 name="Date de sortie", value="A determiner | Inconnue", inline=True
             )
 
+        # creator(s)
+        creators = "\n".join([person["name"] for person in tv_infos.creator])
         self.add_field(
-            name="Créateur", value=tv_infos.creator, inline=True
+            name="Createur(s)", value=creators, inline=True
         )
+
         self.add_field(
             name="Note moyenne", value=f"{tv_infos.vote_average}/10 par {tv_infos.vote_count} personnes"
         )
@@ -411,6 +414,10 @@ class TVInfo(discord.Embed):
             self.add_field(
                 name="Synopsis", value=f"{tv_infos.overview}", inline=False
             )
+
+        self.add_field(
+            name="Nombre de saisons", value=f"{tv_infos.number_of_seasons}", inline=False
+        )
 
         acteurs = "".join(
             f"{acteur} : {charac}\n"
@@ -435,6 +442,32 @@ class TVInfo(discord.Embed):
         return self
 
 
+class TVSelection(discord.ui.Select):
+    def __init__(self, list_tv):
+        options = [
+            discord.SelectOption(label=f"{list_tv[i].title}", value=f"{i}")
+            for i in range(len(list_tv))
+        ]
+        self.list_movie = list_tv
+
+        super().__init__(
+            placeholder="Selectionne une série pour des informations",
+            max_values=1,
+            min_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        movie = self.list_movie[int(self.values[0])]
+        await interaction.response.send_message(embed=TVInfo(movie).get_embed())
+
+
+class SelectViewTV(discord.ui.View):
+    def __init__(self, list_movie, timeout=60):
+        super().__init__(timeout=timeout)
+        self.add_item(TVSelection(list_movie))
+
+# -------------------------------------------- Search Cog ----------------------------
 class Search(commands.Cog):
     """
     A class that represents a search music cog.
@@ -627,7 +660,7 @@ class Search(commands.Cog):
                 )
 
             await interaction.followup.send(
-                embed=emb,
+                embed=emb, view=SelectViewTV(top_10_results)
             )
         else:
             emb_error = discord.Embed(
