@@ -238,7 +238,7 @@ class PersonInfo(discord.Embed):
                 movie_dict = dict(movie)
                 try:
                     played_in_list.append(movie_dict["title"])
-                except KeyError:
+                except Exception:
                     with contextlib.suppress(Exception):
                         played_in_list.append(movie_dict["name"])
 
@@ -255,7 +255,15 @@ class PersonInfo(discord.Embed):
 
         # Made movies
         if _ := person_infos.created_movies:
-            played_in_list = [film["title"] for film in person_infos.created_movies]
+            played_in_list = []
+
+            for film in person_infos.created_movies:
+                try:
+                    played_in_list.append(film["title"])
+                except Exception:
+                    with contextlib.suppress(KeyError):
+                        played_in_list.append(film["name"])
+
             played_in = "\n".join(played_in_list)
 
             self.add_field(
@@ -358,6 +366,108 @@ class SelectViewPerson(discord.ui.View):
         super().__init__(timeout=timeout)
         self.add_item(PersonSelection(list_person))
 
+
+# --------------------------------------- TV ----------------------------------------------------
+class TVInfo(discord.Embed):
+    def __init__(self, tv_infos, *args, **kwargs):
+        """
+        Initialize the TVInfo embed.
+
+        Args:
+            movie_infos: The movie information object.
+            *args: Additional arguments to pass to the discord.Embed constructor.
+            **kwargs: Additional keyword arguments to pass to the discord.Embed constructor.
+        """
+        super().__init__(*args, **kwargs)
+        self.title = tv_infos.title
+        self.color = discord.Color.from_rgb(69, 44, 129)
+
+        self.set_thumbnail(
+            url=f"https://image.tmdb.org/t/p/w500{tv_infos.poster_path}"
+        )
+
+        if tv_infos.release_date:
+            self.add_field(
+                name="Date de sortie", value=f"{tv_infos.release_date}", inline=True
+            )
+        else:
+            self.add_field(
+                name="Date de sortie", value="A determiner | Inconnue", inline=True
+            )
+
+        # creator(s)
+        creators = "\n".join([person["name"] for person in tv_infos.creator])
+        self.add_field(
+            name="Createur(s)", value=creators, inline=True
+        )
+
+        self.add_field(
+            name="Note moyenne", value=f"{tv_infos.vote_average}/10 par {tv_infos.vote_count} personnes"
+        )
+
+        len_overview_movie = len(tv_infos.overview)
+        if len_overview_movie > 1020:
+            self.add_field(
+                name="Synopsis", value=f"{tv_infos.overview[:1020]}...", inline=False
+            )
+        else:
+            self.add_field(
+                name="Synopsis", value=f"{tv_infos.overview}", inline=False
+            )
+
+        self.add_field(
+            name="Nombre de saisons", value=f"{tv_infos.number_of_seasons}", inline=False
+        )
+
+        acteurs = "".join(
+            f"{acteur} : {charac}\n"
+            for acteur, charac in tv_infos.four_main_actor.items()
+        )
+        self.add_field(
+            name="Acteurs principaux", value=acteurs
+        )
+
+        if tv_infos.trailer_key:
+            self.add_field(
+                name="Bande annonce", value=f"https://www.youtube.com/watch?v={tv_infos.trailer_key}", inline=False
+            )
+
+    def get_embed(self):
+        """
+        Get the movie information embed.
+
+        Returns:
+            The movie information embed.
+        """
+        return self
+
+
+class TVSelection(discord.ui.Select):
+    def __init__(self, list_tv):
+        options = [
+            discord.SelectOption(label=f"{list_tv[i].title}", value=f"{i}")
+            for i in range(len(list_tv))
+        ]
+        self.list_movie = list_tv
+
+        super().__init__(
+            placeholder="Selectionne une série pour des informations",
+            max_values=1,
+            min_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        movie = self.list_movie[int(self.values[0])]
+        await interaction.response.send_message(embed=TVInfo(movie).get_embed())
+
+
+class SelectViewTV(discord.ui.View):
+    def __init__(self, list_movie, timeout=60):
+        super().__init__(timeout=timeout)
+        self.add_item(TVSelection(list_movie))
+
+# -------------------------------------------- Search Cog ----------------------------
 class Search(commands.Cog):
     """
     A class that represents a search music cog.
@@ -528,6 +638,58 @@ class Search(commands.Cog):
             emb_error.add_field(
                 name=":warning: Erreur :warning:",
                 value=f"Aucune personne trouvé pour cette recherche: ***{nom_de_la_personne}***"
+            )
+            await interaction.followup.send(embed=emb_error)
+    
+    @app_commands.command()
+    async def search_serie(self, interaction, nom_de_la_serie: str):
+        await interaction.response.defer()
+        
+        self.result = self.info.search_tv(nom_de_la_serie)
+        if self.result:
+            top_10_results = self.result[:10]
+            emb = discord.Embed(
+                title="Resultats - 10 séries les plus populaires",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            for i, res in enumerate(top_10_results):
+                emb.add_field(
+                    name=f"{i+1} - {res.title}",
+                    value=f"[Image de : {res.title}](https://image.tmdb.org/t/p/w500{res.poster_path})",
+                    inline=False,
+                )
+
+            await interaction.followup.send(
+                embed=emb, view=SelectViewTV(top_10_results)
+            )
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucune serie trouvée pour cette recherche: ***{nom_de_la_serie}***"
+            )
+            await interaction.followup.send(embed=emb_error)
+    
+    @app_commands.command()
+    async def info_serie(self, interaction, nom_de_la_serie: str):
+        await interaction.response.defer()
+
+        self.result = self.info.search_tv(nom_de_la_serie)
+        if self.result:
+            top_tv = self.result[0]
+            
+            await interaction.followup.send(embed=TVInfo(top_tv).get_embed())
+        else:
+            emb_error = discord.Embed(
+                title="Pas de resultats",
+                color=discord.Color.from_rgb(69, 44, 129),
+            )
+            emb_error.add_field(
+                name=":warning: Erreur :warning:",
+                value=f"Aucune serie trouvée pour cette recherche: ***{nom_de_la_serie}***"
             )
             await interaction.followup.send(embed=emb_error)
 

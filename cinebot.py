@@ -1,4 +1,5 @@
-from tmdbv3api import TMDb, Movie, Person
+import contextlib
+from tmdbv3api import TMDb, Movie, Person, TV
 from babel.dates import format_date
 import datetime
 
@@ -41,7 +42,7 @@ class MovieInfo:
 
         if release_date := movie_info["release_date"]:
             date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
-            self.release_date = format_date(date, format="full", locale="fr_FR")
+            self.release_date = format_date(date, format="full", locale="fr_FR").capitalize()
 
         # cast
         self.details = movie_details
@@ -92,7 +93,7 @@ class PersonInfo:
         # Birthday
         if birthday := infos["birthday"]:
             date = datetime.datetime.strptime(birthday, "%Y-%m-%d")
-            self.birthday = format_date(date, format="full", locale="fr_FR")
+            self.birthday = format_date(date, format="full", locale="fr_FR").capitalize()
 
         # Place of birth
         if place_of_birth := infos["place_of_birth"]:
@@ -140,6 +141,49 @@ class PersonInfo:
         return vote * vote_count
 
 
+class TVInfo:
+    def __init__(self, tv_infos, tv_details, tv_credits) -> None:
+        self.title = tv_infos["name"]
+        self.poster_path = tv_infos["poster_path"]
+        self.overview = tv_infos["overview"]
+        self.vote_average = tv_infos["vote_average"]
+        self.vote_count = tv_infos["vote_count"]
+
+        if release_date := tv_infos["first_air_date"]:
+            date = datetime.datetime.strptime(release_date, "%Y-%m-%d")
+            self.release_date = format_date(date, format="full", locale="fr_FR").capitalize()
+
+        # creator
+        self.creator = "Actuellement pas de createur"
+        with contextlib.suppress(Exception):
+            self.creator = tv_details["created_by"]
+
+        # cast
+        self.cast = tv_details["credits"]["cast"]
+        self.four_main_actor = {}
+
+        if len(self.cast) <= 4:
+            for actor in self.cast:
+                self.four_main_actor[f"{actor['name']}"] = actor["character"]
+        else:
+            for i in range(4):
+                for actor in self.cast:
+                    if int(actor["order"]) == i:
+                        self.four_main_actor[f"{actor['name']}"] = actor["character"]
+
+        # trailer
+        self.trailer_key = None
+        for video in tv_details["videos"]["results"]:
+            if video["type"] == "Trailer":
+                self.trailer_key = video["key"]
+        
+        # seasons infos
+        self.number_of_seasons = 0
+        for season in tv_details["seasons"]:
+            if season["season_number"] > 0:
+                self.number_of_seasons += 1
+
+
 class Client(TMDb):
     """A class that represents a TMDB client.
 
@@ -169,7 +213,7 @@ class Client(TMDb):
         self.language = language
 
 
-class InfoSearch(Movie, Person):
+class InfoSearch(Movie, Person, TV):
     """A class that represents a movie.
 
     This class extends the Client and Movie classes and provides additional functionality for searching movies.
@@ -195,6 +239,7 @@ class InfoSearch(Movie, Person):
         """
         Movie.__init__(self, client)
         Person.__init__(self, client)
+        TV.__init__(self, client)
 
     def search_movies(self, query):
         """Search for movies.
@@ -252,6 +297,25 @@ class InfoSearch(Movie, Person):
 
                 new_person = PersonInfo(res, person_infos, person_details)
                 return_list.append(new_person)
+            return return_list
+        except Exception:
+            return None
+    
+    def search_tv(self, query):
+        try:
+            return_list = []
+            
+            tvs = self.get_tv_infos(query)
+            tvs_list = list(tvs)
+
+            for res in tvs_list:
+                tv_id = res["id"]
+
+                tv_details = self.details_tv(tv_id)
+                tv_credits = self.credits_tv(tv_id)
+
+                new_tv = TVInfo(res, tv_details, tv_credits)
+                return_list.append(new_tv)
             return return_list
         except Exception:
             return None
