@@ -2,11 +2,9 @@
 CineBot est un bot discord permettant d'avoir des informations sur le septième art.
 
 ## Installation
-Le bot fonctionne sur Windows avec la venv intégrée au code. 
-
-Pour Linux et MacOs, refaire une venv avec les bibliothèques de requirements.txt ET modifier les fichiers person.py et movie.py de la bibliothèque tmdbv3api avec ceux du répertoire.
+La branche master ne focntionne que pour windows (à cause de la venv avec des library custom).
+Pour Linux et MacOS, il y a une branche qui permet de l'utiliser
 
 ## À faire
- - Ajouter les séries
  - Optimiser le code
  - Ajouter d'autres informations (moins important genre les splateformes où l'on peut le regarder)
