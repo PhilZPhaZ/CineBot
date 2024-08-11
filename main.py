@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from discord.ext import commands
 from cinebot import Client
+from datetime import timedelta
 import os
 import discord
 import asyncio
@@ -48,5 +49,15 @@ async def sync(interaction):
     msg = await interaction.followup.send(f"Synced {synced} commands")
     await asyncio.sleep(10)
     await msg.delete()
+
+@bot.tree.command()
+async def poll(interaction):
+    poll = discord.Poll("Oui ou non ?", duration=timedelta(hours=1))
+    poll.add_answer(text="Oui")
+    poll.add_answer(text="Non")
+
+
+    await interaction.response.send_message(poll=poll)
+
 
 bot.run(DISCORD_TOKEN)
