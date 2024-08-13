@@ -443,6 +443,18 @@ class TVInfo(discord.Embed):
 
 
 class TVSelection(discord.ui.Select):
+    """
+    A custom UI component for selecting a TV series from a list.
+
+    Args:
+        list_tv (list): A list of TV series objects to populate the selection options.
+
+    Returns:
+        None
+
+    Raises:
+        No specific exceptions are raised.
+    """
     def __init__(self, list_tv):
         options = [
             discord.SelectOption(label=f"{list_tv[i].title}", value=f"{i}")
@@ -463,6 +475,19 @@ class TVSelection(discord.ui.Select):
 
 
 class SelectViewTV(discord.ui.View):
+    """
+    Initialize a UI component with a list of movies for selection.
+
+    Args:
+        list_movie (list): A list of movie objects to populate the selection.
+        timeout (int, optional): Timeout value for the UI component in seconds. Defaults to 60.
+
+    Returns:
+        None
+
+    Raises:
+        No specific exceptions are raised.
+    """
     def __init__(self, list_movie, timeout=60):
         super().__init__(timeout=timeout)
         self.add_item(TVSelection(list_movie))
@@ -643,6 +668,21 @@ class Search(commands.Cog):
     
     @app_commands.command()
     async def search_serie(self, interaction, nom_de_la_serie: str):
+        """
+        Search for a TV series and display the top 10 most popular results.
+
+        Args:
+            nom_de_la_serie (str): The name of the TV series to search for.
+
+        Returns:
+            None
+
+        Raises:
+            No specific exceptions are raised.
+
+        Examples:
+            None
+        """
         await interaction.response.defer()
         
         self.result = self.info.search_tv(nom_de_la_serie)
@@ -675,6 +715,19 @@ class Search(commands.Cog):
     
     @app_commands.command()
     async def info_serie(self, interaction, nom_de_la_serie: str):
+        """
+        Retrieve information about a specific TV series and send it as an embed.
+
+        Args:
+            interaction: The interaction object.
+            nom_de_la_serie (str): The name of the TV series to retrieve information for.
+
+        Returns:
+            None
+
+        Raises:
+            No specific exceptions are raised.
+        """
         await interaction.response.defer()
 
         self.result = self.info.search_tv(nom_de_la_serie)
