@@ -251,6 +251,7 @@ class InfoSearch(Movie, Person, TV):
             The search results.
 
         """
+
         try:
             return_list = []
 
