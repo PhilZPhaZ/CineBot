@@ -11,10 +11,9 @@ load_dotenv()
 API_KEY_TMDB = os.getenv("API_KEY_TMDB")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
-
 class CineBot(commands.Bot):
     def __init__(self):
-        self.EXTENSIONS = ("cogs.search_info",)
+        self.EXTENSIONS = ("cogs.search_info.search",)
         intents = discord.Intents.all()
         intents.message_content = True
 
@@ -47,6 +46,5 @@ async def sync(interaction):
     msg = await interaction.followup.send(f"Synced {synced} commands")
     await asyncio.sleep(10)
     await msg.delete()
-
 
 bot.run(DISCORD_TOKEN)
