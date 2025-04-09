@@ -145,7 +145,7 @@ class Movie(TMDb):
             key="results"
         )
 
-    def recommendations(self, movie_id, page=1):
+    def recommendations_movie(self, movie_id, page=1):
         """
         Get a list of recommended movies for a movie.
         :param movie_id: int

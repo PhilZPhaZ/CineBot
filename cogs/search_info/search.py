@@ -1,7 +1,7 @@
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
-from .views import SelectViewMovie, SelectViewPerson, SelectViewTV
+from .views import SelectViewMovie, SelectViewPerson, SelectViewTV, RecommendationViewMovie, RecommendationViewTV
 from utils import create_error_embed
 from cinebot import InfoSearch, Client
 from .movie import MovieInfo
@@ -104,7 +104,7 @@ class Search(commands.Cog):
             if self.result:
                 top_movie = self.result[0]
 
-                await interaction.followup.send(embed=MovieInfo(top_movie).get_embed())
+                await interaction.followup.send(embed=MovieInfo(top_movie).get_embed(), view=RecommendationViewMovie(top_movie.recommendations))
             else:
                 await interaction.followup.send(
                     embed=create_error_embed(
@@ -277,8 +277,7 @@ class Search(commands.Cog):
             self.result = self.info.search_tv(nom_de_la_serie)
             if self.result:
                 top_tv = self.result[0]
-                
-                await interaction.followup.send(embed=TVInfo(top_tv).get_embed())
+                await interaction.followup.send(embed=TVInfo(top_tv).get_embed(), view=RecommendationViewTV(top_tv.recommendations))
             else:
                 await interaction.followup.send(
                     embed=create_error_embed(

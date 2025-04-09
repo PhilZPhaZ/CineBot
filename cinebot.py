@@ -80,12 +80,13 @@ class InfoSearch(Movie, Person, TV):
 
                 # get movie video infos
                 movie_videos_info = self.videos(movie_id)
-
                 movie_details = self.details_film(movie_id)
-
                 movie_details.providers = self.watch_providers_movie(movie_id)
 
-                new_film = MovieInfo(res, movie_details, movie_videos_info)
+                # recommendations
+                movie_recommendations = self.recommendations_movie(movie_id)
+
+                new_film = MovieInfo(res, movie_details, movie_videos_info, movie_recommendations)
                 return_list.append(new_film)
             return return_list
         except Exception:
@@ -122,23 +123,21 @@ class InfoSearch(Movie, Person, TV):
             return None
     
     def search_tv(self, query):
-        try:
-            return_list = []
-            
-            tvs = self.get_tv_infos(query)
-            tvs_list = list(tvs)
+        return_list = []
+        
+        tvs = self.get_tv_infos(query)
+        tvs_list = list(tvs)
 
-            for res in tvs_list:
-                tv_id = res["id"]
+        for res in tvs_list:
+            tv_id = res["id"]
 
-                tv_details = self.details_tv(tv_id)
+            tv_details = self.details_tv(tv_id)
+            tv_details.providers = self.watch_providers_tv(tv_id)
+            tv_credits = self.credits_tv(tv_id)
 
-                tv_details.providers = self.watch_providers_tv(tv_id)
+            # recommendations
+            tv_recommendations = self.recommendations_tv(tv_id)
 
-                tv_credits = self.credits_tv(tv_id)
-
-                new_tv = TVInfo(res, tv_details, tv_credits)
-                return_list.append(new_tv)
-            return return_list
-        except Exception:
-            return None
+            new_tv = TVInfo(res, tv_details, tv_credits, tv_recommendations)
+            return_list.append(new_tv)
+        return return_list

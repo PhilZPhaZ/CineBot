@@ -31,8 +31,9 @@ class MovieInfo:
     Examples:
         None
     """
-    def __init__(self, movie_info, movie_details, movie_videos_info) -> None:
+    def __init__(self, movie_info, movie_details, movie_videos_info, movie_recommendations) -> None:
         # general
+        self.movie_id = movie_info.get("id", None)
         self.title = movie_info.get("title", None)
         self.poster_path = movie_info.get("poster_path", None)
         self.overview = movie_info.get("overview", None)
@@ -90,3 +91,8 @@ class MovieInfo:
                         if isinstance(item, AsObj) and item.get("flatrate"):
                             for country_provider in item["flatrate"]:
                                 self.flatrate.append(country_provider["provider_name"])
+        
+        # recommendations
+        self.recommendations = None
+        if movie_recommendations.get("results"):
+            self.recommendations = movie_recommendations.get("results")

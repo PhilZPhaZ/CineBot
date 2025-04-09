@@ -5,7 +5,7 @@ import datetime
 
 
 class TVInfo:
-    def __init__(self, tv_infos, tv_details, tv_credits) -> None:
+    def __init__(self, tv_infos, tv_details, tv_credits, tv_recommendations) -> None:
         self.title = tv_infos.get("name", None)
         self.poster_path = tv_infos.get("poster_path", None)
         self.overview = tv_infos.get("overview", None)
@@ -40,12 +40,11 @@ class TVInfo:
             if video["type"] == "Trailer":
                 self.trailer_key = video["key"]
 
+
         # seasons infos
         self.number_of_seasons = 0
         if tv_details.get("number_of_seasons"):
-            for season in tv_details["number_of_seasons"]:
-                if season["season_number"] > 0:
-                    self.number_of_seasons += 1
+            self.number_of_seasons = tv_details["number_of_seasons"]
 
         # providers infos
         self.providers = None
@@ -61,3 +60,8 @@ class TVInfo:
                         if isinstance(item, AsObj) and item.get("flatrate"):
                             for country_provider in item["flatrate"]:
                                 self.flatrate.append(country_provider["provider_name"])
+
+        # recommendations
+        self.recommendations = None
+        if tv_recommendations.get("results"):
+            self.recommendations = tv_recommendations.get("results")
