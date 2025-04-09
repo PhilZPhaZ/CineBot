@@ -23,7 +23,7 @@ CineBot vous permet de rechercher et d'afficher :
 1. Clonez le dépôt :
 
     ```bash
-    git clone https://github.com/votre_utilisateur/CineBot.git
+    git clone https://github.com/PhilZPhaZ/CineBot.git
     cd CineBot
     ```
 
